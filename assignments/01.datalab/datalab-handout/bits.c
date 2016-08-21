@@ -150,14 +150,7 @@ int bitAnd(int x, int y) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-
-
-
-
-
-
-
-  return 2;
+  return ( x >> 8 * n ) & 0xff;
 
 }
 /* 
@@ -169,7 +162,19 @@ int getByte(int x, int n) {
  *   Rating: 3 
  */
 int logicalShift(int x, int n) {
-  return 2;
+  return ( (~!n + 1) & x ) + ( (!n - 1) & ( (x >> n) & ~( ~0 << (32 - n) ) ) );
+}
+int countBits(int x, int shift) {
+
+    x >>= shift;
+
+    int u0 = 1,      u1 = 1 << 1, u2 = 1 << 2, u3 = 1 << 3;
+    int u4 = 1 << 4, u5 = 1 << 5, u6 = 1 << 6, u7 = 1 << 7;
+
+    int w = ((x & u0) >> 0) + ((x & u1) >> 1) + ((x & u2) >> 2) + ((x & u3) >> 3) +
+            ((x & u4) >> 4) + ((x & u5) >> 5) + ((x & u6) >> 6) + ((x & u7) >> 7);
+
+    return w;
 }
 /*
  * bitCount - returns count of number of 1's in word
@@ -179,7 +184,7 @@ int logicalShift(int x, int n) {
  *   Rating: 4
  */
 int bitCount(int x) {
-  return 2;
+  return countBits(x, 0) + countBits(x, 8) + countBits(x, 16) + countBits(x, 24);
 }
 /* 
  * bang - Compute !x without using !
@@ -189,7 +194,12 @@ int bitCount(int x) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+
+    int u = x >> 31;
+    int v = (~x + 1) >> 31;
+    int w = (u | v) & 1;
+    int z = (~w + 1) + 1;
+  return z;
 }
 /* 
  * tmin - return minimum two's complement integer 
