@@ -137,6 +137,8 @@ NOTES:
  *   Legal ops: ~ |
  *   Max ops: 8
  *   Rating: 1
+ *   
+ *   Solution: de Morgan law
  */
 int bitAnd(int x, int y) {
   return ~(~x|~y);
@@ -148,6 +150,8 @@ int bitAnd(int x, int y) {
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 6
  *   Rating: 2
+ *   
+ *   Solution: standard operation
  */
 int getByte(int x, int n) {
   return ( x >> 8 * n ) & 0xff;
@@ -192,9 +196,14 @@ int bitCount(int x) {
  *   Legal ops: ~ & ^ | + << >>
  *   Max ops: 12
  *   Rating: 4 
+ *   
+ *   Solution: idea - if x != 0 then x or -x has sign bit
+ *   (x | -x) >> 31 == -1
+ *
+ *   Solution below is mine. Optimized solution:
+ *   ((x | (~x + 1)) >> 31) + 1
  */
 int bang(int x) {
-
     int u = x >> 31;
     int v = (~x + 1) >> 31;
     int w = (u | v) & 1;
@@ -202,13 +211,13 @@ int bang(int x) {
   return z;
 }
 /* 
- * tmin - return minimum two's complement integer 
+ * tmin - return minimum two's complement integer (TMin = 0x80...)
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 4
  *   Rating: 1
  */
 int tmin(void) {
-  return 2;
+  return 1 << 31;
 }
 /* 
  * fitsBits - return 1 if x can be represented as an 
@@ -241,7 +250,7 @@ int divpwr2(int x, int n) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x + 1;
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -249,9 +258,15 @@ int negate(int x) {
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 8
  *   Rating: 3
+ *   
+ *   Solution: if we don't have TMin we need only to check if -x has sign bit
+ *   (0 doesn't have this property). This check gives us 1 for positives and 0 
+ *   otherwise. (Problem: Tmin = -Tmin).
+ *   So we have to distinguish positive numbers and Tmin as well and then use
+ *   logical AND. And this is simple - Tmin has sign bit.
  */
 int isPositive(int x) {
-  return 2;
+  return ((x >> 31) ^ 1) & ((~x + 1) >> 31) & 1;
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -261,7 +276,7 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+  return 2; 
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0
@@ -273,6 +288,13 @@ int isLessOrEqual(int x, int y) {
 int ilog2(int x) {
   return 2;
 }
+
+
+
+
+
+
+// float point 
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
  *   floating point argument f.
@@ -313,3 +335,23 @@ unsigned float_i2f(int x) {
 unsigned float_twice(unsigned uf) {
   return 2;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
