@@ -164,10 +164,39 @@ int getByte(int x, int n) {
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 20
  *   Rating: 3 
+ *   Solution: this is a problem from the book (2.53 in 1 st ed.). 
+ *   Idea is quite simple - we use a mask 0...01...1 with n 0s and 
+ *   handle case when n == 0 separately - not to use 32 bit shift (undefined in C). 
  */
-int logicalShift(int x, int n) {
+int logicalShift1(int x, int n) {
+  // this is my original solution: idea is the same
+  // I even consider the case of n == 0 to correctly implement left shift 
+  // (hence these expressions: (~!n +1) and (!n - 1))
+  // the only difference: I use -1 to create mask and they shift 1 and substract 1
+  // which approach is better? can we actually use my approach?
   return ( (~!n + 1) & x ) + ( (!n - 1) & ( (x >> n) & ~( ~0 << (32 - n) ) ) );
 }
+int logicalShift2(int x, int n) {
+
+    int xsra = x >> n;
+
+    if (n == 0) {
+        return xsra;
+    } else {
+        int mask = (1 << (32 - n)) - 1;
+        return xsra & mask;
+    }
+}
+int logicalShift(int x, int n) {
+  return logicalShift2(x, n);
+}
+/*
+ * bitCount - returns count of number of 1's in word
+ *   Examples: bitCount(5) = 2, bitCount(7) = 3
+ *   Legal ops: ! ~ & ^ | + << >>
+ *   Max ops: 40
+ *   Rating: 4
+ */
 int countBits(int x, int shift) {
 
     x >>= shift;
@@ -179,16 +208,12 @@ int countBits(int x, int shift) {
             ((x & u4) >> 4) + ((x & u5) >> 5) + ((x & u6) >> 6) + ((x & u7) >> 7);
 
     return w;
-}
-/*
- * bitCount - returns count of number of 1's in word
- *   Examples: bitCount(5) = 2, bitCount(7) = 3
- *   Legal ops: ! ~ & ^ | + << >>
- *   Max ops: 40
- *   Rating: 4
- */
-int bitCount(int x) {
+} 
+int bitCount1(int x) {
   return countBits(x, 0) + countBits(x, 8) + countBits(x, 16) + countBits(x, 24);
+}
+int bitCount(int x) {
+  return 0;
 }
 /* 
  * bang - Compute !x without using !
@@ -210,6 +235,11 @@ int bang(int x) {
     int z = (~w + 1) + 1;
   return z;
 }
+
+/* ------------------------------------------------------------------ */
+
+
+
 /* 
  * tmin - return minimum two's complement integer (TMin = 0x80...)
  *   Legal ops: ! ~ & ^ | + << >>
@@ -228,8 +258,65 @@ int tmin(void) {
  *   Max ops: 15
  *   Rating: 2
  */
+// int fitsBits0(int x, int n) {
+//   int TMin_n = -(1 << (n-1));
+//   int TMax_n = (1 << (n-1)) - 1;
+//   int w1 = (TMin_n <= x); int w2 = (x <= TMax_n);
+//   printf("Tmin=0x%.8x Tmax=0x%.8x w1=%d w2=%d\n", TMin_n, TMax_n, w1, w2);
+  
+//   printf("x=0x%.8x n=%d\n", x, n);
+
+//   int mask1 = ~(-1 << (n - 1));
+//   printf("mask1=0x%.8x\n", mask1);
+//   int mask2 = (mask1 << 1) + 1;
+//   printf("mask2=0x%.8x\n", mask2);
+
+//   int u = (x ^ (x & mask1));
+//   int v = (x ^ (x & mask2));
+
+//   int res;
+//   if (x >= 0) { res = u == 0; printf("%s", "x is non-negative ");}
+//   else { res = v == 0; printf("%s", "x is negative ");}
+//   printf("u=0x%.8x v=0x%.8x res=%d\n\n", u, v, res);
+//   return res;
+// }
+// int fitsBits1(int x, int n) {
+//   // int mask = -1 << (n - 1);
+//   // int u = x & mask;
+//   // int v = (x & mask) ^ mask;
+
+
+
+
+// }
+int fitsBits2(int x, int n) {
+      // step zero: convert n to n - 1
+  int m = n + ( ~0 ) ;
+  // first, get the sign (either 1 or 0)
+  int sign = ( x >> 31 ) & 1;
+
+  // second, convert the sign into a "mask" (all bits either 0 or 1)
+  int mask = ~(sign + ~0); 
+
+  // then xor with x, all leading bits will go away 
+  x = x ^ mask;
+
+  // now shift right n - 1 times
+  x = x >> (m);
+
+  return !x;  
+}
+int fitsBits3(int x, int n) {
+  int mask = x >> 31;
+  return !(((~x & mask) + (x & ~mask)) >> (n + ~0));
+}
+int fitsBits4(int x, int n) {
+  int a = 33 + ~n; // 32 - n
+  int b = ((x << a) >> a); // we get all 0s or 1s at first 32 - n + 1 positions
+  return !(b + ~x + 1); // we just compare with x: b - x == 0
+}
 int fitsBits(int x, int n) {
-  return 2;
+  return fitsBits2(x, n);
 }
 /* 
  * divpwr2 - Compute x/(2^n), for 0 <= n <= 30
@@ -238,9 +325,18 @@ int fitsBits(int x, int n) {
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 15
  *   Rating: 2
+ *
+ *   Solution: this is from lecture.
  */
 int divpwr2(int x, int n) {
-    return 2;
+
+  if (x > 0) {
+    return x >> n;
+  } else {
+    return (x + (1 << n) - 1) >> n;
+  }
+    
+  
 }
 /* 
  * negate - return -x 
@@ -275,8 +371,18 @@ int isPositive(int x) {
  *   Max ops: 24
  *   Rating: 3
  */
+int isNonNegative(int x) {
+  return ((x >> 31) & 1) == 0;
+}
 int isLessOrEqual(int x, int y) {
-  return 2; 
+  if (x <= 0 && y >= 0) {
+      return 1;
+  } else if (x >= 0 && y >= 0) {
+      return isNonNegative(y - x);
+  } else {
+      return x <= y; 
+  }
+  
 }
 /*
  * ilog2 - return floor(log base 2 of x), where x > 0

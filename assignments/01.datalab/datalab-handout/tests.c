@@ -69,8 +69,14 @@ int test_tmin(void) {
 }
 int test_fitsBits(int x, int n)
 {
-  int TMin_n = -(1 << (n-1));
-  int TMax_n = (1 << (n-1)) - 1;
+  int TMin_n, TMax_n;
+  if (n < 32) {
+    TMin_n = -(1 << (n-1));
+    TMax_n = (1 << (n-1)) - 1;
+  } else {
+    TMin_n = 0x80000000;
+    TMax_n = ~TMin_n;
+  }
   return x >= TMin_n && x <= TMax_n;
 }
 int test_divpwr2(int x, int n)
