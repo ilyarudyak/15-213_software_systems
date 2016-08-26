@@ -357,12 +357,19 @@ int negate(int x) {
  *   
  *   Solution: if we don't have TMin we need only to check if -x has sign bit
  *   (0 doesn't have this property). This check gives us 1 for positives and 0 
- *   otherwise. (Problem: Tmin = -Tmin).
+ *   otherwise. Problem: Tmin = -Tmin.
  *   So we have to distinguish positive numbers and Tmin as well and then use
  *   logical AND. And this is simple - Tmin has sign bit.
  */
-int isPositive(int x) {
+int isPositive1(int x) {
   return ((x >> 31) ^ 1) & ((~x + 1) >> 31) & 1;
+}
+// here's an alternative 
+int isPositive2(int x) {
+  return !(x >> 31) & -!!x;
+}
+int isPositive(int x) {
+  return isPositive2(x);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -371,17 +378,16 @@ int isPositive(int x) {
  *   Max ops: 24
  *   Rating: 3
  */
-int isNonNegative(int x) {
-  return ((x >> 31) & 1) == 0;
-}
 int isLessOrEqual(int x, int y) {
-  if (x <= 0 && y >= 0) {
-      return 1;
-  } else if (x >= 0 && y >= 0) {
-      return isNonNegative(y - x);
-  } else {
-      return x <= y; 
-  }
+
+  int w = (x ^ y) >> 31;
+  // if ( !!w ) { // x and y have different sign
+  //     return x < 0;
+  // } else {
+  //     return y - x >= 0; // we don't have overflow in this case
+  // }
+
+  return (!!w & !!(x >> 31)) | (!w & !((y - x) >> 31));
   
 }
 /*
