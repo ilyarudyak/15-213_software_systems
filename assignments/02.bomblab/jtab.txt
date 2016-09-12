@@ -1,0 +1,8 @@
+0x400f7c <phase_3+57>	  # case 0
+0x400fb9 <phase_3+118>  # case 1
+0x400f83 <phase_3+64>	  # case 2
+0x400f8a <phase_3+71>   # case 3
+0x400f91 <phase_3+78>	  # case 4
+0x400f98 <phase_3+85>   # case 5
+0x400f9f <phase_3+92>	  # case 6
+0x400fa6 <phase_3+99>   # case 7
